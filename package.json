@@ -1,0 +1,19 @@
+{
+  "name": "twd-comic-downloader",
+  "version": "1.0.0",
+  "description": "Downloads images of the TWD comic via http://www.omgbeaupeep.com/",
+  "main": "index.js",
+  "bin": {
+    "twd": "index.js"
+  },
+  "dependencies": {
+    "cheerio": "^0.22.0",
+    "commander": "^2.9.0",
+    "prompt": "^1.0.0",
+    "request": "^2.81.0",
+    "winston": "^2.3.1"
+  },
+  "repository": "https://github.com/grantholle/twd-downloader",
+  "author": "Grant Holle <hollegrant@gmail.com>",
+  "license": "MIT"
+}

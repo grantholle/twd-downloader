@@ -1,74 +1,88 @@
+#!/usr/bin/env node
+
 'use strict';
 
-const cheerio = require('cheerio');
-const p = require('path');
-const colors = require('colors');
-const request = require('request');
-const fs = require('fs');
-const imgBase = "http://www.omgbeaupeep.com/comics/";
-const saveBase = '/Users/grant/Downloads/TWD';
-let startIssue = 164;
-const urlBase = `http://www.omgbeaupeep.com/comics/The_Walking_Dead/${startIssue}/`;
+const p = require('path'),
+      colors = require('colors')
+      request = require('request'),
+      fs = require('fs'),
+      cheerio = require('cheerio'),
+      prompt = require('prompt'),
+      winston = require('winston'),
+      program = require('commander'),
+      config = require('./config.json'),
+      imgBase = "http://www.omgbeaupeep.com/comics/",
 
-const download = function (uri, filename, callback) {
-  request.head(uri, function(err, res, body){
-    if (err) {
-      console.log('Error!'.red, e);
-    }
+      getIssueNumber = url => {
+        const parts = url.split('/')
 
-    fs.mkdir(p.dirname(filename), function (e) {
-      request(uri).pipe(fs.createWriteStream(filename)).on('close', callback);
-    });
-  });
-};
+        return parseInt(parts[5], 10)
+      },
 
-console.log('Starting crawl...'.yellow);
-startCrawl(urlBase);
+      getPageNumber = url => {
+        const parts = url.split('/'),
+            page = parseInt(parts[6], 10)
 
-function startCrawl (url) {
+        return page ? page : 1
+      },
 
-  request(url, (err, message, res) => {
-    var $ = cheerio.load(res.toString()),
-        imgPath = imgBase + $('img.picture').attr('src'),
-        savePath = p.join(saveBase, getIssueNumber(url).toString(), pad(getPageNumber(url)) + '.jpg');
+      pad = num => {
+        let s = num + ""
 
-    // Don't download the file twice
-    if (imgPath) {
-      let nextUrl = $('img.picture').parent().attr('href');
+        while (s.length < 3)
+          s = "0" + s
 
-      fs.stat(savePath, (err, stats) => {
-        if (typeof stats === 'undefined') {
-          console.log(`Downloading ${imgPath}`.gray);
+        return s;
+      }
 
-          download(imgPath, savePath, () => {
-            console.log(`Saved ${savePath}!`.green);
+      download = (uri, filename, callback) => {
+        request.head(uri, (err, res, body) => {
+          if (err) {
+            console.log('Error!'.red, e)
+          }
 
-            if (nextUrl)
-              startCrawl(imgBase + nextUrl);
-            else
-              console.log('Crawl complete!'.yellow);
-          });
-        }
-      });
-    }
-  });
-}
+          fs.mkdir(p.dirname(filename), function (e) {
+            request(uri).pipe(fs.createWriteStream(filename)).on('close', callback)
+          })
+        })
+      },
 
-function getIssueNumber(url) {
-  let parts = url.split('/');
+      crawl = url => {
 
-  return parseInt(parts[5], 10);
-}
+        request(url, (err, message, res) => {
+          if (err) {
+            return winston.error(`Requesting ${url} failed`, err)
+          }
 
-function getPageNumber(url) {
-  let parts = url.split('/'),
-      page = parseInt(parts[6], 10);
+          const $ = cheerio.load(res.toString()),
+              imgPath = imgBase + $('img.picture').attr('src'),
+              savePath = p.join(saveBase, getIssueNumber(url).toString(), pad(getPageNumber(url)) + '.jpg')
 
-  return page ? page : 1;
-}
+          if (imgPath) {
+            const nextUrl = $('img.picture').parent().attr('href')
 
-function pad(num) {
-  var s = num + "";
-  while (s.length < 3) s = "0" + s;
-  return s;
-}
+            fs.stat(savePath, (err, stats) => {
+              if (err) {
+                winston.info(`Downloading ${imgPath}`)
+
+                download(imgPath, savePath, () => {
+                  winston.info(`Saved ${savePath}!`)
+
+                  if (nextUrl)
+                    crawl(imgBase + nextUrl)
+                  else
+                    winston.info('Crawl complete!')
+                })
+              }
+            })
+          }
+        })
+      };
+
+program.version(require('./package.json').version)
+  .option('-i', '--issue', 'The issue number at which you wish to start')
+  .option('-d', '--directory', 'The directory in which you wish to put the comic files')
+  .parse
+
+winston.info('Starting crawl...')
+crawl(urlBase)
