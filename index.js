@@ -3,11 +3,9 @@
 'use strict';
 
 const p = require('path'),
-      colors = require('colors')
       request = require('request'),
       fs = require('fs'),
       cheerio = require('cheerio'),
-      prompt = require('prompt'),
       winston = require('winston'),
       program = require('commander'),
       config = require('./config.json'),
@@ -33,7 +31,7 @@ const p = require('path'),
           s = "0" + s
 
         return s;
-      }
+      },
 
       download = (uri, filename, callback) => {
         request.head(uri, (err, res, body) => {
@@ -80,9 +78,10 @@ const p = require('path'),
       };
 
 program.version(require('./package.json').version)
-  .option('-i', '--issue', 'The issue number at which you wish to start')
-  .option('-d', '--directory', 'The directory in which you wish to put the comic files')
-  .parse
+  .option('-i, --issue', 'The issue number at which you wish to start')
+  .option('-d, --directory', 'The directory in which you wish to put the comic files')
+  .option('-s --save', 'Save the directory configuration')
+  .parse(process.argv)
 
 winston.info('Starting crawl...')
 crawl(urlBase)
