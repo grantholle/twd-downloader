@@ -2,6 +2,8 @@
 
 Downloads TWD comics from [OMG.BEAU.PEEP](http://www.omgbeaupeep.com).
 
+![TWD](http://www.omgbeaupeep.com/comics/mangas/The%20Walking%20Dead/001%20-%20The%20Walking%20Dead%20001/The-Walking-Dead-Comic-001.jpg)
+
 ```
 $ twd -h
 
