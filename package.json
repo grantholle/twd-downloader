@@ -9,6 +9,7 @@
   "dependencies": {
     "cheerio": "^0.22.0",
     "commander": "^2.9.0",
+    "jsonfile": "^2.4.0",
     "request": "^2.81.0",
     "winston": "^2.3.1"
   },
