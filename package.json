@@ -13,6 +13,6 @@
     "winston": "^2.3.1"
   },
   "repository": "https://github.com/grantholle/twd-downloader",
-  "author": "Grant Holle <hollegrant@gmail.com>",
+  "author": "Grant Holle (https://github.com/grantholle)",
   "license": "MIT"
 }
